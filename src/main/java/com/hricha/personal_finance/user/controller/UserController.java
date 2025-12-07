@@ -22,6 +22,7 @@ public class UserController {
     public static class CreateUserRequest {
         public String name;
         public String email;
+        public String password; // ⭐ added
     }
 
     public static class SetIncomeRequest {
@@ -31,7 +32,7 @@ public class UserController {
     // POST /api/users
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody CreateUserRequest req) {
-        User user = userService.createUser(req.name, req.email);
+        User user = userService.createUser(req.name, req.email, req.password);
 
         return ResponseEntity.ok(Map.of(
                 "id", user.getId(),

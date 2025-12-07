@@ -4,11 +4,9 @@ import com.hricha.personal_finance.user.model.Income;
 import com.hricha.personal_finance.user.model.User;
 import com.hricha.personal_finance.user.repository.IncomeRepository;
 import com.hricha.personal_finance.user.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.hricha.personal_finance.user.service.UserService;
-import com.hricha.personal_finance.user.service.UserService;
-
 
 import java.util.Optional;
 
@@ -17,15 +15,18 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final IncomeRepository incomeRepository;
-    
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, IncomeRepository incomeRepository) {
+    public UserService(UserRepository userRepository,
+                       IncomeRepository incomeRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.incomeRepository = incomeRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
-    public User createUser(String name, String email) {
+    public User createUser(String name, String email, String rawPassword) {
         // Check if user already exists
         userRepository.findByEmail(email).ifPresent(u -> {
             throw new RuntimeException("User with this email already exists");
@@ -34,6 +35,7 @@ public class UserService {
         User user = User.builder()
                 .name(name)
                 .email(email)
+                .password(passwordEncoder.encode(rawPassword)) // ⭐ Hash password
                 .build();
 
         return userRepository.save(user);
@@ -58,5 +60,9 @@ public class UserService {
 
     public Optional<Income> getIncome(Long userId) {
         return incomeRepository.findByUserId(userId);
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }
