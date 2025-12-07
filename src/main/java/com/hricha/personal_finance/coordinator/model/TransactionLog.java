@@ -20,7 +20,6 @@ public class TransactionLog {
 
     private Long userId;
 
-    private String status;  // INITIATED, PREPARED, COMMITTED, ROLLEDBACK
-
+    private String status; 
     private String reason; // if failed
 }

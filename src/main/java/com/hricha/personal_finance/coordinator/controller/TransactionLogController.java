@@ -5,6 +5,7 @@ import com.hricha.personal_finance.coordinator.repository.TransactionLogReposito
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,6 @@ public class TransactionLogController {
         this.logRepo = logRepo;
     }
 
-    // GET /api/tx/logs
     @GetMapping
     public ResponseEntity<?> getAllLogs() {
         List<TransactionLog> logs = logRepo.findAll();
@@ -27,18 +27,16 @@ public class TransactionLogController {
         );
     }
 
-    // GET /api/tx/logs/user/{userId}
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getLogsForUser(@PathVariable Long userId) {
+    public ResponseEntity<?> getLogsForUser(@PathVariable("userId") Long userId) {
         List<TransactionLog> logs = logRepo.findByUserId(userId);
         return ResponseEntity.ok(
                 logs.stream().map(this::toDto).toList()
         );
     }
 
-    // GET /api/tx/logs/{txId}
     @GetMapping("/{txId}")
-    public ResponseEntity<?> getLogsForTx(@PathVariable String txId) {
+    public ResponseEntity<?> getLogsForTx(@PathVariable("txId") String txId) {
         List<TransactionLog> logs = logRepo.findByTxId(txId);
         return ResponseEntity.ok(
                 logs.stream().map(this::toDto).toList()
@@ -46,12 +44,13 @@ public class TransactionLogController {
     }
 
     private Map<String, Object> toDto(TransactionLog log) {
-        return Map.of(
-                "id", log.getId(),
-                "txId", log.getTxId(),
-                "userId", log.getUserId(),
-                "status", log.getStatus(),
-                "reason", log.getReason()
-        );
+        var m = new HashMap<String, Object>();
+        m.put("id", log.getId());
+        m.put("txId", log.getTxId());
+        m.put("userId", log.getUserId());
+        m.put("status", log.getStatus());
+        // reason can be null — HashMap allows null values
+        m.put("reason", log.getReason());
+        return m;
     }
 }
