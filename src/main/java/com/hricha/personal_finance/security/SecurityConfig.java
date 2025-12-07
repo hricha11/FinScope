@@ -23,22 +23,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // we’re using JWT, no cookies
+                // disable CSRF + CORS for now (we’re testing via Postman/Thunder)
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())
+
+                // stateless session (JWT)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ THESE ARE PUBLIC ENDPOINTS
+                        // these are PUBLIC
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/h2-console/**"
                         ).permitAll()
-                        // ✅ EVERYTHING ELSE NEEDS JWT
+                        // everything else needs JWT
                         .anyRequest().authenticated()
                 )
-                // ✅ Add our JWT filter
+
+                // add our JWT filter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // For H2 console frames
+        // allow H2 console frames
         http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
