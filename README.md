@@ -150,7 +150,7 @@ FinScope/
 ### 1️⃣ Clone the repo
 
 ```bash
-git clone https://github.com/your-username/FinScope.git
+git clone https://github.com/hricha11/FinScope.git
 cd FinScope
 ```
 
@@ -172,32 +172,7 @@ mvn spring-boot:run
 
 ---
 
-# 🚧 **Roadmap**
-
-* 📊 Dashboard module
-* 📈 Monthly analytics
-* 🤖 AI-based spending predictions
-* 📱 React frontend
-* 🧾 Export reports (CSV/PDF)
-
----
-
 # 🤝 **Contributing**
 
 Pull requests and suggestions are always welcome!
 
----
-
-# 📜 **License**
-
-MIT License © 2025 — FinScope
-
----
-
-If you'd like, I can also make:
-
-🔹 A **banner** for the top of your README
-🔹 A **logo concept** for FinScope
-🔹 A **section explaining each domain (Budget, Goal, User, Coordinator)**
-
-Want any of these?
