@@ -2,6 +2,7 @@ import { Pie, PieChart, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import { BudgetAllocation } from '../../types'
 
 const COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#0ea5e9', '#ef4444', '#14b8a6']
+const LEFTOVER_COLOR = '#94a3b8' // slate-ish grey for leftover
 
 const BudgetPie = ({ data }: { data: BudgetAllocation[] }) => {
   if (!data?.length) {
@@ -26,7 +27,13 @@ const BudgetPie = ({ data }: { data: BudgetAllocation[] }) => {
             paddingAngle={4}
           >
             {data.map((entry, index) => (
-              <Cell key={entry.category} fill={COLORS[index % COLORS.length]} />
+              <Cell
+                key={entry.category}
+                fill={entry.category === 'LEFTOVER'
+                  ? LEFTOVER_COLOR
+                  : COLORS[index % COLORS.length]
+                }
+              />
             ))}
           </Pie>
           <Tooltip />
@@ -37,5 +44,3 @@ const BudgetPie = ({ data }: { data: BudgetAllocation[] }) => {
 }
 
 export default BudgetPie
-
-
