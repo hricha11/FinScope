@@ -11,7 +11,7 @@ const BudgetPage = () => {
   const [allocations, setAllocations] = useState<BudgetAllocation[]>([])
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('')
-  const [amount, setAmount] = useState<number>(0)
+  const [amount, setAmount] = useState<number>()
 
   const userId = user?.id || '1'
 
@@ -33,7 +33,7 @@ const BudgetPage = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!category || amount <= 0) {
+    if (!category || !amount || amount <= 0) {
       addToast('Category and amount are required', 'error')
       return
     }

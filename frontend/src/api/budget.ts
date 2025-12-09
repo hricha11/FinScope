@@ -1,10 +1,11 @@
-import apiClient from "./client";
+// src/api/budget.ts
+import api from './axios'
 import { BudgetAllocation } from "../types";
 
 export const getBudget = async (
   userId: string
 ): Promise<BudgetAllocation[]> => {
-  const res = await apiClient.get(`/api/budget/${userId}`);
+  const res = await api.get(`/api/budget/${userId}`);
   return res.data;
 };
 
@@ -13,7 +14,7 @@ export const setBudget = async (
   category: string,
   amount: number
 ): Promise<void> => {
-  await apiClient.post(`/api/budget/${userId}`, {
+  await api.post(`/api/budget/${userId}`, {
     category,
     amount,
   });
@@ -23,7 +24,7 @@ export const deleteBudget = async (
   userId: string,
   category: string
 ): Promise<void> => {
-  await apiClient.delete(
+  await api.delete(
     `/api/budget/${userId}/${encodeURIComponent(category)}`
   );
 };
@@ -34,7 +35,7 @@ export const prepareBudget = async (
   category: string,
   amount: number
 ) => {
-  return apiClient.post(`/api/budget/prepare`, {
+  return api.post(`/api/budget/prepare`, {
     transactionId: txId,
     userId,
     category,
@@ -43,5 +44,5 @@ export const prepareBudget = async (
 };
 
 export const commitBudget = async (txId: string) => {
-  return apiClient.post(`/api/budget/commit/${txId}`);
+  return api.post(`/api/budget/commit/${txId}`);
 };

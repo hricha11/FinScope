@@ -10,11 +10,13 @@ import { useAuth } from '../contexts/AuthContext'
 const GoalsPage = () => {
   const { addToast } = useToast()
   const { user } = useAuth()
+
   const [goals, setGoals] = useState<Goal[]>([])
   const [loading, setLoading] = useState(true)
+
   const [name, setName] = useState('')
-  const [targetAmount, setTargetAmount] = useState(0)
-  const [months, setMonths] = useState(6)
+  const [targetAmount, setTargetAmount] = useState<number | ''>('')   // 👈 blank by default
+  const [months, setMonths] = useState<number | ''>('')               // 👈 blank by default
 
   const loadGoals = async () => {
     try {
@@ -34,21 +36,34 @@ const GoalsPage = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!name || targetAmount <= 0 || months <= 0) {
+
+    if (!name || targetAmount === '' || months === '') {
       addToast('Please provide valid goal details', 'error')
       return
     }
+
+    const numericTarget = Number(targetAmount)
+    const numericMonths = Number(months)
+
+    if (numericTarget <= 0 || numericMonths <= 0) {
+      addToast('Target amount and months must be positive', 'error')
+      return
+    }
+
     try {
       await createGoal({
         userId: Number(user?.id) || 1,
         name,
-        targetAmount,
-        targetMonths: months,
+        targetAmount: numericTarget,
+        targetMonths: numericMonths,
       })
+
       addToast('Goal created', 'success')
+
+      // reset form – keep everything blank
       setName('')
-      setTargetAmount(0)
-      setMonths(6)
+      setTargetAmount('')
+      setMonths('')
       loadGoals()
     } catch (error: any) {
       addToast(error?.response?.data?.message || 'Failed to create goal', 'error')
@@ -64,7 +79,10 @@ const GoalsPage = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-3">
+      <form
+        onSubmit={handleSubmit}
+        className="grid gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-3"
+      >
         <div>
           <label className="block text-sm font-medium text-slate-700">Name</label>
           <input
@@ -75,6 +93,7 @@ const GoalsPage = () => {
             required
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium text-slate-700">Target Amount</label>
           <input
@@ -83,10 +102,13 @@ const GoalsPage = () => {
             min={1}
             className="mt-1 w-full rounded border border-slate-200 px-3 py-2 focus:border-primary-500 focus:outline-none"
             value={targetAmount}
-            onChange={(e) => setTargetAmount(Number(e.target.value))}
+            onChange={(e) =>
+              setTargetAmount(e.target.value === '' ? '' : Number(e.target.value))
+            }
             required
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium text-slate-700">Months</label>
           <input
@@ -95,10 +117,13 @@ const GoalsPage = () => {
             min={1}
             className="mt-1 w-full rounded border border-slate-200 px-3 py-2 focus:border-primary-500 focus:outline-none"
             value={months}
-            onChange={(e) => setMonths(Number(e.target.value))}
+            onChange={(e) =>
+              setMonths(e.target.value === '' ? '' : Number(e.target.value))
+            }
             required
           />
         </div>
+
         <div className="flex items-end">
           <button
             type="submit"
@@ -137,4 +162,3 @@ const GoalsPage = () => {
 }
 
 export default GoalsPage
-
