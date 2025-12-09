@@ -5,6 +5,7 @@ import { Goal } from '../types'
 import Loader from '../components/Shared/Loader'
 import { useToast } from '../components/Shared/Toast'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 const GoalsPage = () => {
   const { addToast } = useToast()

@@ -13,15 +13,19 @@ import { useToast } from '../components/Shared/Toast'
 const DashboardPage = () => {
   const { user } = useAuth()
   const { addToast } = useToast()
+
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [loanModalOpen, setLoanModalOpen] = useState(false)
 
   const loadData = async () => {
     try {
-      const resp = await fetchDashboard(user?.id || '1')
+      setLoading(true)
+      const resp = await fetchDashboard(user?.id ?? 1)
+      console.log('📊 Dashboard response:', resp)
       setData(resp)
     } catch (error: any) {
+      console.error('❌ Failed to load dashboard:', error)
       addToast(error?.response?.data?.message || 'Failed to load dashboard', 'error')
     } finally {
       setLoading(false)
@@ -42,12 +46,34 @@ const DashboardPage = () => {
     )
   }
 
-  if (!data) return null
+  if (!data) {
+    return (
+      <div className="p-4 text-sm text-slate-600">
+        Could not load dashboard data.
+      </div>
+    )
+  }
 
-  const activeUserId = data.userId || user?.id || '1'
+  // ✅ SAFE FALLBACKS – no more crashes on undefined
+  const goals = data.goals ?? []
+  const budgets = (data as any).budgets ?? [] // adjust when you know actual key
+  const recentTransactions = data.recentTransactions ?? []
+
+  const monthlyIncome = data.monthlyIncome ?? 0
+  const totalAllocated = data.totalAllocated ?? 0
+  const emiAllocation = data.emiAllocation ?? 0
+  const availableForSavings = data.availableForSavings ?? 0
+
+  const activeUserId = data.userId ?? user?.id ?? 1
 
   return (
     <div className="space-y-6">
+      {/* TEMP: show raw JSON so page is never blank & we can inspect the API */}
+      <div className="rounded-lg bg-slate-900 text-slate-100 p-3 text-xs">
+        <div className="mb-1 font-semibold text-emerald-300">Raw Dashboard JSON</div>
+        <pre>{JSON.stringify(data, null, 2)}</pre>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-slate-800">Dashboard</h1>
@@ -55,7 +81,7 @@ const DashboardPage = () => {
         </div>
         <button
           onClick={() => setLoanModalOpen(true)}
-          disabled={!data.goals.length}
+          disabled={!goals.length}
           className="rounded bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
           Start Loan Plan
@@ -63,26 +89,26 @@ const DashboardPage = () => {
       </div>
 
       <SummaryCards
-        income={data.monthlyIncome}
-        allocated={data.totalAllocated}
-        emi={data.emiAllocation}
-        available={data.availableForSavings}
+        income={monthlyIncome}
+        allocated={totalAllocated}
+        emi={emiAllocation}
+        available={availableForSavings}
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <BudgetPie data={data.budgets} />
+          <BudgetPie data={budgets} />
         </div>
-        <GoalsPreview goals={data.goals} />
+        <GoalsPreview goals={goals} />
       </div>
 
-      <RecentTransactions data={data.recentTransactions} />
+      <RecentTransactions data={recentTransactions} />
 
       <StartLoanModal
         isOpen={loanModalOpen}
         onClose={() => setLoanModalOpen(false)}
-        userId={activeUserId}
-        goals={data.goals}
+        userId={String(activeUserId)}
+        goals={goals}
         onSuccess={loadData}
       />
     </div>
@@ -90,4 +116,3 @@ const DashboardPage = () => {
 }
 
 export default DashboardPage
-

@@ -1,41 +1,47 @@
-import api from './axios'
-import { BudgetAllocation } from '../types'
+import apiClient from "./client";
+import { BudgetAllocation } from "../types";
 
-export const getBudget = async (userId: string | number) => {
-  const { data } = await api.get<BudgetAllocation[]>(`/api/budget/${userId}`)
-  return data
-}
+export const getBudget = async (
+  userId: string
+): Promise<BudgetAllocation[]> => {
+  const res = await apiClient.get(`/api/budget/${userId}`);
+  return res.data;
+};
 
 export const setBudget = async (
-  userId: string | number,
+  userId: string,
   category: string,
-  amount: number,
-) => {
-  const { data } = await api.post<BudgetAllocation[]>(`/api/budget/${userId}`, {
+  amount: number
+): Promise<void> => {
+  await apiClient.post(`/api/budget/${userId}`, {
     category,
     amount,
-  })
-  return data
-}
+  });
+};
+
+export const deleteBudget = async (
+  userId: string,
+  category: string
+): Promise<void> => {
+  await apiClient.delete(
+    `/api/budget/${userId}/${encodeURIComponent(category)}`
+  );
+};
 
 export const prepareBudget = async (
   txId: string,
-  userId: string | number,
+  userId: string,
   category: string,
-  deltaAmount: number,
+  amount: number
 ) => {
-  const { data } = await api.post(`/api/budget/prepare`, {
-    txId,
+  return apiClient.post(`/api/budget/prepare`, {
+    transactionId: txId,
     userId,
     category,
-    deltaAmount,
-  })
-  return data
-}
+    amount,
+  });
+};
 
 export const commitBudget = async (txId: string) => {
-  const { data } = await api.post(`/api/budget/commit`, { txId })
-  return data
-}
-
-
+  return apiClient.post(`/api/budget/commit/${txId}`);
+};
