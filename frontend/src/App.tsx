@@ -5,6 +5,7 @@ import GoalsPage from './pages/GoalsPage'
 import GoalDetailPage from './pages/GoalDetailPage'
 import ProfilePage from './pages/ProfilePage'
 import LoginPage from './pages/LoginPage'
+import TransactionPage from './pages/TransactionPage'
 import RegisterPage from './pages/RegisterPage'
 import NotFoundPage from './pages/NotFoundPage'
 import Navbar from './components/Layout/Navbar'
@@ -37,6 +38,7 @@ const App = () => {
           <Route path="/budget" element={<BudgetPage />} />
           <Route path="/goals" element={<GoalsPage />} />
           <Route path="/goals/:id" element={<GoalDetailPage />} />
+          <Route path="/transactions" element={<TransactionPage/>} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>

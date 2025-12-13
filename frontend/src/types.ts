@@ -2,6 +2,14 @@ export interface BudgetAllocation {
   category: string
   amount: number
 }
+export interface Transaction {
+  id: number
+  amount: number
+  date: string
+  time: string
+  category?: string
+  description?: string
+}
 
 export interface Goal {
   id: string
