@@ -35,14 +35,15 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ PUBLIC endpoints
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/api/health",      // 👈 allow health without JWT
+                                "/api/health",
                                 "/h2-console/**"
                         ).permitAll()
-                        // ✅ everything else needs JWT
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // ✅ ADD THIS
                         .anyRequest().authenticated()
+
+
                 )
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
