@@ -7,6 +7,7 @@ import {
 import Loader from '../components/Shared/Loader'
 import { useToast } from '../components/Shared/Toast'
 import { useAuth } from '../contexts/AuthContext'
+import { predictSpending } from '../api/predict'
 
 export interface Transaction {
   id: number
@@ -19,7 +20,7 @@ export interface Transaction {
 
 const TransactionsPage = () => {
   const { addToast } = useToast()
-  const { user } = useAuth()
+  const { user , token} = useAuth()
 
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
@@ -99,24 +100,29 @@ const TransactionsPage = () => {
     }
   }
 
-  const handlePredict = async () => {
-    try {
-      setPredicting(true)
-
-      // replace this with real backend call later
-      const mockPrediction = 12500
-
-      setPrediction(mockPrediction)
-      addToast(
-        `Predicted next month expense: ₹${mockPrediction.toLocaleString()}`,
-        'success'
-      )
-    } catch {
-      addToast('Prediction failed', 'error')
-    } finally {
-      setPredicting(false)
+const handlePredict = async () => {
+  try {
+    if (!token) {
+      addToast('Please login again', 'error')
+      return
     }
+
+    setPredicting(true)
+
+    const res = await predictSpending(token)
+
+    setPrediction(res.predictedAmount)
+    addToast('Prediction successful', 'success')
+  } catch (error: any) {
+    addToast(
+      error?.response?.data?.message || 'Prediction failed',
+      'error'
+    )
+  } finally {
+    setPredicting(false)
   }
+}
+
 
   return (
     <div className="space-y-6">
