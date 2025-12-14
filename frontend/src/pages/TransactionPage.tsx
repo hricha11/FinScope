@@ -1,5 +1,9 @@
 import { FormEvent, useEffect, useState } from 'react'
-import { createTransaction, getTransactions, deleteTransaction } from '../api/transactions'
+import {
+  createTransaction,
+  getTransactions,
+  deleteTransaction,
+} from '../api/transactions'
 import Loader from '../components/Shared/Loader'
 import { useToast } from '../components/Shared/Toast'
 import { useAuth } from '../contexts/AuthContext'
@@ -19,6 +23,8 @@ const TransactionsPage = () => {
 
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
+  const [predicting, setPredicting] = useState(false)
+  const [prediction, setPrediction] = useState<number | null>(null)
 
   // form state
   const [amount, setAmount] = useState<number | ''>('')
@@ -27,12 +33,17 @@ const TransactionsPage = () => {
   const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
 
+  const userId = String(Number(user?.id) || 1)
+
   const loadTransactions = async () => {
     try {
-      const res = await getTransactions(String(Number(user?.id) || 1))
+      const res = await getTransactions(userId)
       setTransactions(res)
     } catch (error: any) {
-      addToast(error?.response?.data?.message || 'Could not load transactions', 'error')
+      addToast(
+        error?.response?.data?.message || 'Could not load transactions',
+        'error'
+      )
     } finally {
       setLoading(false)
     }
@@ -53,7 +64,7 @@ const TransactionsPage = () => {
 
     try {
       await createTransaction(
-        String(Number(user?.id) || 1),
+        userId,
         amount,
         date,
         time,
@@ -63,7 +74,6 @@ const TransactionsPage = () => {
 
       addToast('Transaction added', 'success')
 
-      // reset form
       setAmount('')
       setDate('')
       setTime('')
@@ -72,7 +82,10 @@ const TransactionsPage = () => {
 
       loadTransactions()
     } catch (error: any) {
-      addToast(error?.response?.data?.message || 'Failed to add transaction', 'error')
+      addToast(
+        error?.response?.data?.message || 'Failed to add transaction',
+        'error'
+      )
     }
   }
 
@@ -86,12 +99,45 @@ const TransactionsPage = () => {
     }
   }
 
+  const handlePredict = async () => {
+    try {
+      setPredicting(true)
+
+      // replace this with real backend call later
+      const mockPrediction = 12500
+
+      setPrediction(mockPrediction)
+      addToast(
+        `Predicted next month expense: ₹${mockPrediction.toLocaleString()}`,
+        'success'
+      )
+    } catch {
+      addToast('Prediction failed', 'error')
+    } finally {
+      setPredicting(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-semibold text-slate-800">Transactions</h1>
-        <p className="text-sm text-slate-500">Track your income and expenses</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-800">
+            Transactions
+          </h1>
+          <p className="text-sm text-slate-500">
+            Track your income and expenses
+          </p>
+        </div>
+
+        <button
+          onClick={handlePredict}
+          disabled={predicting}
+          className="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+        >
+          {predicting ? 'Predicting...' : 'Predict'}
+        </button>
       </div>
 
       {/* Create Transaction Form */}
@@ -100,7 +146,9 @@ const TransactionsPage = () => {
         className="grid gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-3"
       >
         <div>
-          <label className="block text-sm font-medium text-slate-700">Amount</label>
+          <label className="block text-sm font-medium text-slate-700">
+            Amount
+          </label>
           <input
             type="number"
             min={1}
@@ -114,7 +162,9 @@ const TransactionsPage = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700">Date</label>
+          <label className="block text-sm font-medium text-slate-700">
+            Date
+          </label>
           <input
             type="date"
             className="mt-1 w-full rounded border border-slate-200 px-3 py-2"
@@ -125,7 +175,9 @@ const TransactionsPage = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700">Time</label>
+          <label className="block text-sm font-medium text-slate-700">
+            Time
+          </label>
           <input
             type="time"
             className="mt-1 w-full rounded border border-slate-200 px-3 py-2"
@@ -136,7 +188,9 @@ const TransactionsPage = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700">Category</label>
+          <label className="block text-sm font-medium text-slate-700">
+            Category
+          </label>
           <input
             className="mt-1 w-full rounded border border-slate-200 px-3 py-2"
             value={category}
@@ -145,7 +199,9 @@ const TransactionsPage = () => {
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-slate-700">Description</label>
+          <label className="block text-sm font-medium text-slate-700">
+            Description
+          </label>
           <input
             className="mt-1 w-full rounded border border-slate-200 px-3 py-2"
             value={description}
@@ -163,9 +219,19 @@ const TransactionsPage = () => {
         </div>
       </form>
 
+      {/* Prediction Result */}
+      {prediction && (
+        <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-700">
+          📈 Predicted next month expense:{' '}
+          <strong>₹{prediction.toLocaleString()}</strong>
+        </div>
+      )}
+
       {/* Transactions List */}
       <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="mb-3 text-sm font-semibold text-slate-700">Your Transactions</div>
+        <div className="mb-3 text-sm font-semibold text-slate-700">
+          Your Transactions
+        </div>
 
         {loading ? (
           <Loader />
@@ -178,10 +244,12 @@ const TransactionsPage = () => {
               >
                 <div>
                   <div className="text-sm font-semibold text-slate-800">
-                    ₹{tx.amount.toLocaleString()} • {tx.category || 'General'}
+                    ₹{tx.amount.toLocaleString()} •{' '}
+                    {tx.category || 'General'}
                   </div>
                   <div className="text-xs text-slate-500">
-                    {tx.date} at {tx.time} — {tx.description || 'No description'}
+                    {tx.date} at {tx.time} —{' '}
+                    {tx.description || 'No description'}
                   </div>
                 </div>
 
