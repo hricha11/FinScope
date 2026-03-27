@@ -4,7 +4,8 @@
 
 ### *Your Personal Finance Command Center*
 
-FinScope is a modular, scalable personal finance backend built with **Spring Boot**, designed around **Feature-Based Modular Architecture** and advanced **transaction management (Two-Phase Commit)**.
+FinScope is a modular, scalable personal finance backend built with **Spring Boot**, designed around **Feature-Based Modular Architecture**
+![alt text](image.png)
 It provides clean REST APIs for users, budgets, goals, loans, and distributed transaction coordination — built to demonstrate real-world backend engineering skills.
 
 ---
