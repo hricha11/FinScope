@@ -21,6 +21,7 @@ export interface Transaction {
 const TransactionsPage = () => {
   const { addToast } = useToast()
   const { user , token} = useAuth()
+  console.log('🔐 JWT from AuthContext:', token)
 
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)

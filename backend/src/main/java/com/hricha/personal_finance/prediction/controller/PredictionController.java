@@ -15,10 +15,10 @@ public class PredictionController {
     private final PredictionService predictionService;
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> predict() {
-        System.out.println(">>> PredictionController HIT");
-        Double result = predictionService.predict();
-        return ResponseEntity.ok(Map.of("predictedAmount", result));
+    public ResponseEntity<?> predict(@RequestParam Long userId) {
+        return ResponseEntity.ok(
+                Map.of("prediction", predictionService.predict(userId))
+        );
     }
-
 }
+

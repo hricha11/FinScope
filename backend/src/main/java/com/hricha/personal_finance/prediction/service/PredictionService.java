@@ -1,35 +1,56 @@
 package com.hricha.personal_finance.prediction.service;
 
+import com.hricha.personal_finance.transaction.model.Transaction;
+import com.hricha.personal_finance.transaction.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PredictionService {
 
     private final RestTemplate restTemplate;
+    private final TransactionRepository transactionRepository;
 
-    public Double predict() {
-         System.out.println(">>> PredictionService HIT");
-        // TEMP payload (until DB wiring)
-        List<Map<String, Object>> payload = List.of(
-                Map.of("date", "2025-01-01", "amount", 1200),
-                Map.of("date", "2025-01-05", "amount", 1500),
-                Map.of("date", "2025-02-01", "amount", 1800),
-                Map.of("date", "2025-02-10", "amount", 1700),
-                Map.of("date", "2025-03-01", "amount", 2000),
-                Map.of("date", "2025-03-15", "amount", 2200),
-                Map.of("date", "2025-04-01", "amount", 2400),
-                Map.of("date", "2025-04-10", "amount", 2600),
-                Map.of("date", "2025-05-01", "amount", 2800),
-                Map.of("date", "2025-05-10", "amount", 3000)
-        );
+    public Double predict(Long userId) {
 
+        System.out.println(">>> PredictionService HIT");
+
+        // 1️⃣ Fetch REAL transactions from DB
+        List<Transaction> transactions =
+                transactionRepository.findByUserIdOrderByDateAsc(userId);
+
+        if (transactions.size() < 5) {
+            throw new RuntimeException("Not enough data for prediction");
+        }
+
+        // 2️⃣ Aggregate amount per date (IMPORTANT for Prophet)
+        Map<LocalDate, Double> dailyTotals =
+                transactions.stream()
+                        .collect(Collectors.groupingBy(
+                                Transaction::getDate,
+                                Collectors.summingDouble(Transaction::getAmount)
+                        ));
+
+        // 3️⃣ Convert to Prophet payload format
+        List<Map<String,Object>> payload =
+                dailyTotals.entrySet()
+                        .stream()
+                        .map(e -> {
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("date", e.getKey().toString());
+                            map.put("amount", e.getValue());
+                            return map;
+                        })
+                        .toList();
+
+        // 4️⃣ Call Python service
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 

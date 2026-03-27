@@ -23,20 +23,16 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// ✅ Always read latest JWT from localStorage before request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("finscope_token");
 
-  if (!config.headers) config.headers = {} as any;
-
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.set("Authorization", `Bearer ${token}`);
   }
 
   return config;
 });
 
-// Handle 401 errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
